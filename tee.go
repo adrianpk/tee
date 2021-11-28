@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -28,9 +29,7 @@ func main() {
 
 	t := NewTee(ffnn, *append)
 
-	t.openWriters()
-
-	t.write()
+	run(t)
 }
 
 func NewTee(fileNames []string, append bool) (t *tee) {
@@ -45,6 +44,19 @@ func NewTee(fileNames []string, append bool) (t *tee) {
 	t.updateFileFlags()
 
 	return t
+}
+
+func run(t *tee) {
+	err := t.execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func (tee *tee) execute() error {
+	tee.openWriters()
+	return tee.write()
 }
 
 func (tee *tee) updateFileFlags() {
