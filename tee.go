@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 type (
@@ -20,16 +21,14 @@ type (
 )
 
 func main() {
-	append := flag.String("append", "", "append to the given FILEs, do not overwrite")
+	append := flag.Bool("append", false, "append to the given FILEs, do not overwrite")
 	flag.Parse()
 
-	fmt.Println(append) // FIX: Remove this line
+	ffnn := filenames(flag.Args())
 
-	ffnn := parseFileNames(flag.Args())
+	t := NewTee(ffnn, *append)
 
-	t := NewTee(ffnn, false)
-
-	t.openWiters()
+	t.openWriters()
 
 	t.write()
 }
@@ -56,7 +55,7 @@ func (tee *tee) updateFileFlags() {
 	tee.fileFlag = tee.fileFlag | os.O_TRUNC
 }
 
-func (tee *tee) openWiters() {
+func (tee *tee) openWriters() {
 	for _, fn := range tee.fileNames {
 		file, err := os.OpenFile(fn, tee.fileFlag, os.FileMode(tee.filePerms))
 		if err != nil {
@@ -84,8 +83,15 @@ func (tee *tee) write() error {
 	return nil
 }
 
-func parseFileNames(args []string) []string {
-	// FIX: Not implemented
-	fmt.Printf("%+v\n", args)
-	return args
+func filenames(args []string) []string {
+	ffnn := []string{}
+
+	for _, a := range args {
+		if !strings.HasPrefix(a, "-") {
+			ffnn = append(ffnn, a)
+		}
+	}
+
+	fmt.Printf("%+v\n", ffnn)
+	return ffnn
 }
