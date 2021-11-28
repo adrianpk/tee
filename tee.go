@@ -17,6 +17,7 @@ type (
 		fileNames  []string
 		fileFlag   int
 		filePerms  int
+		files      []*os.File
 	}
 )
 
@@ -55,6 +56,8 @@ func run(t *tee) {
 }
 
 func (tee *tee) execute() error {
+	defer tee.closeFiles()
+
 	tee.openWriters()
 	return tee.write()
 }
@@ -75,12 +78,21 @@ func (tee *tee) openWriters() {
 			log.Fatal(err)
 		}
 
+		tee.files = append(tee.files, file)
 		tee.output = append(tee.output, file)
-
 	}
 
 	// Append console to output
 	tee.output = append(tee.output, os.Stdout)
+}
+
+func (tee *tee) closeFiles() {
+	for _, f := range tee.files {
+		err := f.Close()
+		if err != nil {
+			fmt.Errorf("error closing file: %+w", err)
+		}
+	}
 }
 
 func (tee *tee) write() error {
