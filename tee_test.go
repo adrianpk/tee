@@ -1,6 +1,8 @@
 package main_test
 
 import (
+	"fmt"
+	"io/ioutil"
 	"testing"
 )
 
@@ -9,11 +11,11 @@ const (
 	sampleText2 = "consectetur adipiscing elit,\n"
 	sampleText3 = "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua\n"
 
-	file1Name = "out-1.txt"
-	file2Name = "out-2.txt"
-	file3Name = "out-3.txt"
-
 	expectedTestNonAppendThreeFiles = sampleText1 + sampleText2 + sampleText3
+)
+
+var (
+	filenames = []string{"out-1.txt", "out-2.txt", "out-3.txt"}
 )
 
 type (
@@ -47,16 +49,16 @@ func TestBase(t *testing.T) {
 			Name: "TestNonAppendThreeFiles",
 			SetupData: &setupData{
 				flags:     "--append",
-				filenames: []string{"out-1.txt", "out-2.txt", "out-3.txt"},
+				filenames: filenames,
 			},
 			AssertFn: verifyAssertion,
 			AssertData: assertionData{
 				expected: assertionItem{
 					stdOutput: expectedTestNonAppendThreeFiles,
 					fileOutput: map[string]string{
-						"out-1.txt": expectedTestNonAppendThreeFiles,
-						"out-2.txt": expectedTestNonAppendThreeFiles,
-						"out-3.txt": expectedTestNonAppendThreeFiles,
+						filenames[0]: expectedTestNonAppendThreeFiles,
+						filenames[1]: expectedTestNonAppendThreeFiles,
+						filenames[2]: expectedTestNonAppendThreeFiles,
 					},
 				},
 			},
@@ -85,9 +87,9 @@ func runTest(t *testing.T, tc testCase) {
 		tc.AssertData.actual = assertionItem{
 			stdOutput: "not calculated yet",
 			fileOutput: map[string]string{
-				file1Name: "not calculated yet",
-				file2Name: "not calculated yet",
-				file3Name: "not calculated yet",
+				filenames[0]: "not calculated yet",
+				filenames[1]: "not calculated yet",
+				filenames[2]: "not calculated yet",
 			},
 		}
 
@@ -104,9 +106,15 @@ func verifyAssertion(t *testing.T, ad assertionData) {
 }
 
 func assertExpected(ad assertionData) (ok bool) {
-	if ad.expected.stdOutput != ad.actual.stdOutput {
-		return false
-	}
+	// if ad.expected.stdOutput != ad.actual.stdOutput {
+	// 	return false
+	// }
+
+	loadOutputFiles(&ad.expected)
+
+	fmt.Println("----------------------")
+	fmt.Printf("%+v\n", ad.actual.fileOutput)
+	fmt.Println("----------------------")
 
 	for k, expected := range ad.expected.fileOutput {
 		actual, ok := ad.actual.fileOutput[k]
@@ -118,4 +126,31 @@ func assertExpected(ad assertionData) (ok bool) {
 	ok = true
 
 	return ok
+}
+
+// Helpers
+func loadOutputFiles(ai *assertionItem) (err error) {
+	for _, filename := range mapKeys(ai.fileOutput) {
+
+		content, err := ioutil.ReadFile("./test/out/" + filename)
+		if err != nil {
+			continue
+		}
+
+		ai.fileOutput[filename] = string(content)
+	}
+
+	return err
+}
+
+func mapKeys(m map[string]string) (keys []string) {
+	keys = make([]string, len(m))
+
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+
+	return keys
 }
