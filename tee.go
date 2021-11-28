@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -85,6 +84,8 @@ func (tee *tee) write() error {
 	return nil
 }
 
+// Helpers
+
 func filenames(args []string) []string {
 	ffnn := []string{}
 
@@ -94,6 +95,5 @@ func filenames(args []string) []string {
 		}
 	}
 
-	fmt.Printf("%+v\n", ffnn)
 	return ffnn
 }
