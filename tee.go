@@ -22,6 +22,7 @@ type (
 
 func main() {
 	append := flag.Bool("append", false, "append to the given FILEs, do not overwrite")
+
 	flag.Parse()
 
 	ffnn := filenames(flag.Args())
@@ -50,6 +51,7 @@ func NewTee(fileNames []string, append bool) (t *tee) {
 func (tee *tee) updateFileFlags() {
 	if tee.fileAppend {
 		tee.fileFlag = tee.fileFlag | os.O_APPEND
+		return
 	}
 
 	tee.fileFlag = tee.fileFlag | os.O_TRUNC
