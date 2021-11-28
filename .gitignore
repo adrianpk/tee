@@ -1,1 +1,2 @@
 bin/tee
+test/out/out*.txt
