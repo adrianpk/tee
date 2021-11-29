@@ -26,9 +26,9 @@ func main() {
 
 	flag.Parse()
 
-	ffnn := filenames(flag.Args())
+	files := filenames(flag.Args())
 
-	t := NewTee(ffnn, *append)
+	t := NewTee(files, *append)
 
 	run(t)
 }
@@ -59,6 +59,7 @@ func (tee *tee) execute() error {
 	defer tee.closeFiles()
 
 	tee.openWriters()
+
 	return tee.write()
 }
 
@@ -90,7 +91,7 @@ func (tee *tee) closeFiles() {
 	for _, f := range tee.files {
 		err := f.Close()
 		if err != nil {
-			fmt.Errorf("error closing file: %+w", err)
+			fmt.Printf("error closing file: %s", err.Error())
 		}
 	}
 }
