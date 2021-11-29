@@ -7,3 +7,11 @@ build:
 .PHONY: test
 test:
 	go test ./...
+
+.PHONY: aliastee
+aliastee:
+	alias tee='bin/tee'
+
+.PHONY: unaliastee
+unaliastee:
+	unalias tee
